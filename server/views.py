@@ -1,23 +1,23 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
+from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .exceptions import ConflictError
 from .models import Event, Review
 from .serializers import EventSerializer, RegisterSerializer, ReviewSerializer
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.db import IntegrityError
-from .exceptions import ConflictError
+
 # from drf_spectacular.utils import extend_schema
 
 
 @api_view(["GET"])
 def root(request):
-    return Response({
-        "status": "working",
-        "version": "0.2.0"
-    })
+    return Response({"status": "working", "version": "0.2.0"})
+
 
 class EventListCreateView(generics.ListCreateAPIView):
     queryset = Event.objects.all().order_by("-date_created")
@@ -27,6 +27,7 @@ class EventListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class ReviewListCreateView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -34,7 +35,7 @@ class ReviewListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         event_id = self.kwargs["event_id"]
         return Review.objects.filter(event_id=event_id)
-    
+
     def perform_create(self, serializer):
         event_id = self.kwargs["event_id"]
         event = get_object_or_404(Event, id=event_id)
@@ -43,6 +44,7 @@ class ReviewListCreateView(generics.ListCreateAPIView):
             serializer.save(event=event, user=self.request.user)
         except IntegrityError:
             raise ConflictError("You have already reviewed this event.")
+
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -55,8 +57,10 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
 
         refresh = RefreshToken.for_user(user)
-        return Response({
-            "user": user.username,
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        })
+        return Response(
+            {
+                "user": user.username,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
+        )
