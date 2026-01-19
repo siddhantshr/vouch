@@ -1,5 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+
 
 class Event(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -9,14 +10,11 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    event = models.ForeignKey(
-        Event,
-        related_name="reviews",
-        on_delete=models.CASCADE
-    )
+    event = models.ForeignKey(Event, related_name="reviews", on_delete=models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,8 +22,7 @@ class Review(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "event"],
-                name="one_review_per_user_per_event"
+                fields=["user", "event"], name="one_review_per_user_per_event"
             )
         ]
 
