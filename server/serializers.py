@@ -1,12 +1,22 @@
 from rest_framework import serializers
 from .models import Event, Review
 from django.contrib.auth.models import User
+from django.db.models import Avg
+
 
 class EventSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, obj):
+        reviews = obj.reviews.all()
+        if not reviews.exists():
+            return None
+        return reviews.aggregate(Avg("rating"))["rating__avg"]
+    
     class Meta:
         model = Event
-        fields = ["id", "title", "content", "date_created"]
-        read_only_fields = ["id", "date_created"]
+        fields = ["id", "user", "title", "content", "date_created", "rating"]
+        read_only_fields = ["id", "user", "date_created", "rating"]
 
 class ReviewSerializer(serializers.ModelSerializer):
     def validate_rating(self, value):
@@ -16,8 +26,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ["id", "rating", "comment", "created_at"]
-        read_only_fields = ["id", "created_at"]
+        fields = ["id", "user", "rating", "comment", "created_at"]
+        read_only_fields = ["id", "user", "created_at"]
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(

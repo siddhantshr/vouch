@@ -5,22 +5,31 @@ from .models import Event, Review
 from .serializers import EventSerializer, RegisterSerializer, ReviewSerializer
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db import IntegrityError
+from .exceptions import ConflictError
+# from drf_spectacular.utils import extend_schema
+
 
 @api_view(["GET"])
 def root(request):
     return Response({
         "status": "working",
-        "version": "0.1.0-dev"
+        "version": "0.2.0"
     })
 
 class EventListCreateView(generics.ListCreateAPIView):
     queryset = Event.objects.all().order_by("-date_created")
     serializer_class = EventSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class ReviewListCreateView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         event_id = self.kwargs["event_id"]
@@ -29,11 +38,15 @@ class ReviewListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         event_id = self.kwargs["event_id"]
         event = get_object_or_404(Event, id=event_id)
-        serializer.save(event=event)
+
+        try:
+            serializer.save(event=event, user=self.request.user)
+        except IntegrityError:
+            raise ConflictError("You have already reviewed this event.")
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
-    queryset = User.objects.all() # 'select * from user;'
+    queryset = User.objects.all()
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
@@ -41,7 +54,6 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # generate token
         refresh = RefreshToken.for_user(user)
         return Response({
             "user": user.username,
