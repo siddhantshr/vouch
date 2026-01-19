@@ -11,5 +11,7 @@ urlpatterns = [
     path("login/", TokenObtainPairView.as_view()),
     path("login/refresh/", TokenObtainPairView.as_view()),
     path("events/<int:pk>/delete/", views.EventDestroyView.as_view()),
-    path("events/<int:event_id>/reviews/<int:pk>/delete/", views.ReviewDelete.as_view()),
+    path(
+        "events/<int:event_id>/reviews/<int:pk>/delete/", views.ReviewDelete.as_view()
+    ),
 ]
