@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-9jr@^9j03e2i@)2npp7cv9wyij+qtr^(9@xih%3z_c)vx#mb+p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['139.59.89.55', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['139.59.89.55', 'localhost', '127.0.0.1', 'api.vouch.sidshr.in']
 
 
 # Application definition
