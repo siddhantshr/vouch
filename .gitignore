@@ -31,3 +31,5 @@ temp/
 
 # ignore pycache
 __pycache__/
+
+db.sqlite3
