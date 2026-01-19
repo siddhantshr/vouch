@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -16,9 +16,9 @@ from .serializers import EventSerializer, RegisterSerializer, ReviewSerializer
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def root(request):
     return Response({"status": "working", "version": "0.2.0"})
-
 
 class EventListCreateView(generics.ListCreateAPIView):
     queryset = Event.objects.all().order_by("-date_created")
