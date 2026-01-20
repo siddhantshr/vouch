@@ -13,20 +13,23 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-9jr@^9j03e2i@)2npp7cv9wyij+qtr^(9@xih%3z_c)vx#mb+p"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = ['139.59.89.55', 'localhost', '127.0.0.1', 'api.vouch.sidshr.in']
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
 
 
 # Application definition
@@ -55,7 +58,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "Vouch API",
     "DESCRIPTION": "API for creating events and reviews",
-    "VERSION": "0.1.0-dev",
+    "VERSION": f"v{os.getenv('VERSION')}",
 }
 
 
@@ -136,10 +139,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 if DEBUG:
     STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'staticfiles'),
+        os.path.join(BASE_DIR, "staticfiles"),
     ]
 if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
