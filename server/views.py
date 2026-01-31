@@ -1,19 +1,18 @@
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.utils import timezone
 
 from .exceptions import ConflictError
 from .models import Event, Review
 from .permissions import IsOwnerOrSuperUser
 from .serializers import EventSerializer, RegisterSerializer, ReviewSerializer
-
-from rest_framework.filters import SearchFilter
 
 # from drf_spectacular.utils import extend_schema
 
@@ -30,7 +29,7 @@ class EventListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     filter_backends = [SearchFilter]
-    search_fields = ['title']   # 👈 searchable fields
+    search_fields = ["title"]  # 👈 searchable fields
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -39,10 +38,12 @@ class EventListCreateView(generics.ListCreateAPIView):
         upcoming = [event for event in queryset if event.startTime >= now]
         past = [event for event in queryset if event.startTime < now]
 
-        return Response({
-            "upcoming": self.get_serializer(upcoming, many=True).data,
-            "past": self.get_serializer(past, many=True).data,
-        })
+        return Response(
+            {
+                "upcoming": self.get_serializer(upcoming, many=True).data,
+                "past": self.get_serializer(past, many=True).data,
+            }
+        )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
