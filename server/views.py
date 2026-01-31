@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -20,7 +21,9 @@ from .serializers import EventSerializer, RegisterSerializer, ReviewSerializer
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def root(request):
-    return Response({"status": "working", "version": "v0.2.4"})
+    return Response(
+        {"status": "working", "version": settings.SPECTACULAR_SETTINGS["VERSION"]}
+    )
 
 
 class EventListCreateView(generics.ListCreateAPIView):
