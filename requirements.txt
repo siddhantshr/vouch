@@ -6,3 +6,4 @@ black==26.1.0
 isort==7.0.0
 flake8==7.3.0
 dotenv==0.9.9
+django-cors-headers==4.9.0
