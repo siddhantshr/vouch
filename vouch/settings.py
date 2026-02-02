@@ -83,6 +83,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://instiview.sidshr.in/",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
